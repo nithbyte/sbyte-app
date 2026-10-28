@@ -1,5 +1,5 @@
 {
-  "name": "@sbyte/customer-mobile",
+  "name": "sbyte-app",
   "version": "0.1.0",
   "private": true,
   "main": "expo/AppEntry.js",
@@ -14,8 +14,6 @@
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",
-    "@sbyte/shared-types": "*",
-    "@sbyte/ui-tokens": "*",
     "expo": "~52.0.28",
     "expo-status-bar": "~2.0.1",
     "react": "18.3.1",
@@ -38,8 +36,8 @@
       "**/__tests__/**/*.spec.ts"
     ],
     "moduleNameMapper": {
-      "^@sbyte/shared-types$": "<rootDir>/../../packages/shared-types/src/index.ts",
-      "^@sbyte/ui-tokens$": "<rootDir>/../../packages/ui-tokens/src/index.ts"
+      "^@sbyte/shared-types$": "<rootDir>/src/shared/shared-types.ts",
+      "^@sbyte/ui-tokens$": "<rootDir>/src/shared/ui-tokens.ts"
     }
   }
 }
