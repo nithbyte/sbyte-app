@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "S BYTE",
+    "slug": "sbyte-customer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#123D35"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sbyte.customer"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#123D35"
+      },
+      "package": "com.sbyte.customer"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
