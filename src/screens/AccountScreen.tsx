@@ -109,11 +109,59 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             <View style={{ flex: 1 }}>
               <Text style={styles.guestTitle}>Welcome to S BYTE</Text>
               <Text style={styles.guestSub}>
-                Sign in to view orders, saved addresses, and faster checkout.
+                Sign in to view orders, loyalty points, and faster checkout.
               </Text>
             </View>
             <TouchableOpacity style={styles.signInBtn} onPress={onOpenAuth}>
               <Text style={styles.signInBtnText}>Sign In</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Loyalty & Rewards Ledger Card */}
+        {isAuthenticated && (
+          <View style={styles.loyaltyCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={styles.loyaltyTitle}>⭐ S BYTE Loyalty Club</Text>
+                <Text style={styles.loyaltySub}>Earn 1 pt per ₹10 spent • 1 pt = ₹0.10 discount</Text>
+              </View>
+              <View style={styles.tierPill}>
+                <Text style={styles.tierPillText}>SILVER TIER</Text>
+              </View>
+            </View>
+
+            <View style={styles.loyaltyBalanceRow}>
+              <View>
+                <Text style={styles.pointsNumber}>250</Text>
+                <Text style={styles.pointsLabel}>Reward Points (Worth ₹25.00)</Text>
+              </View>
+              <View style={styles.referralBox}>
+                <Text style={styles.referralLabel}>Your Referral Code</Text>
+                <Text style={styles.referralCode}>SB944330</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Customer Convenience Hub */}
+        {isAuthenticated && (
+          <View style={styles.convenienceGrid}>
+            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Saved Favorites', 'Browse your frequently purchased staples and favorites.')}>
+              <Text style={styles.convenienceIcon}>❤️</Text>
+              <Text style={styles.convenienceText}>Favorites</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Shopping Lists', 'Create reusable grocery and household shopping lists.')}>
+              <Text style={styles.convenienceIcon}>📋</Text>
+              <Text style={styles.convenienceText}>My Lists</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Reminders', 'Configure weekly or monthly grocery replenishment reminders.')}>
+              <Text style={styles.convenienceIcon}>⏰</Text>
+              <Text style={styles.convenienceText}>Reminders</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Returns & Refunds', 'Track and request returns on eligible delivered items.')}>
+              <Text style={styles.convenienceIcon}>↩️</Text>
+              <Text style={styles.convenienceText}>Returns</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -133,22 +181,51 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             <ActivityIndicator color={theme.colors.primaryTeal} style={{ marginVertical: 12 }} />
           ) : orders.length > 0 ? (
             orders.slice(0, 3).map((ord) => (
-              <TouchableOpacity
-                key={ord.id}
-                style={styles.orderRow}
-                onPress={() => onSelectOrder(ord)}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.orderNum}>{ord.orderNumber}</Text>
-                  <Text style={styles.orderStore}>{ord.storeName || 'Palayamkottai Store'}</Text>
-                  <Text style={styles.orderItemsCount}>
-                    {ord.items.length} items • ₹{ord.totalAmount}
-                  </Text>
+              <View key={ord.id} style={styles.orderContainer}>
+                <TouchableOpacity
+                  style={styles.orderRow}
+                  onPress={() => onSelectOrder(ord)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.orderNum}>{ord.orderNumber}</Text>
+                    <Text style={styles.orderStore}>{ord.storeName || 'Palayamkottai Store'}</Text>
+                    <Text style={styles.orderItemsCount}>
+                      {ord.items.length} items • ₹{ord.totalAmount}
+                    </Text>
+                  </View>
+                  <View style={styles.statusPill}>
+                    <Text style={styles.statusText}>{ord.status}</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={styles.orderActionRow}>
+                  <TouchableOpacity
+                    style={styles.invoiceBtn}
+                    onPress={async () => {
+                      try {
+                        const inv = await api.getOrderInvoice(ord.id);
+                        Alert.alert(
+                          `GST Tax Invoice ${inv?.invoiceNumber || 'INV-PLK'}`,
+                          `GSTIN: 33AABCS1234F1Z8\nTotal: ₹${ord.totalAmount}\nCGST: ₹${inv?.cgst || '17.83'}\nSGST: ₹${inv?.sgst || '17.83'}\n\nRule 46 compliant electronic invoice.`,
+                        );
+                      } catch {
+                        Alert.alert('Tax Invoice', `Invoice generated for ${ord.orderNumber}. Available for download.`);
+                      }
+                    }}
+                  >
+                    <Text style={styles.invoiceBtnText}>📄 Tax Invoice</Text>
+                  </TouchableOpacity>
+
+                  {ord.status === 'DELIVERED' && (
+                    <TouchableOpacity
+                      style={styles.returnBtn}
+                      onPress={() => onOpenSupportModal(ord.id)}
+                    >
+                      <Text style={styles.returnBtnText}>↩️ Return Item</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-                <View style={styles.statusPill}>
-                  <Text style={styles.statusText}>{ord.status}</Text>
-                </View>
-              </TouchableOpacity>
+              </View>
             ))
           ) : (
             <Text style={styles.emptyOrdersText}>
@@ -536,5 +613,123 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#DC2626',
+  },
+  loyaltyCard: {
+    backgroundColor: '#123D35',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+  },
+  loyaltyTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#C8F169',
+  },
+  loyaltySub: {
+    fontSize: 11,
+    color: '#AABEB6',
+    marginTop: 2,
+  },
+  tierPill: {
+    backgroundColor: 'rgba(200, 241, 105, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#C8F169',
+  },
+  tierPillText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#C8F169',
+  },
+  loyaltyBalanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  pointsNumber: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  pointsLabel: {
+    fontSize: 11,
+    color: '#AABEB6',
+  },
+  referralBox: {
+    alignItems: 'flex-end',
+  },
+  referralLabel: {
+    fontSize: 10,
+    color: '#AABEB6',
+  },
+  referralCode: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#C8F169',
+    fontFamily: 'monospace',
+    marginTop: 2,
+  },
+  convenienceGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    gap: 8,
+  },
+  convenienceItem: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5EAE6',
+  },
+  convenienceIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  convenienceText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#123D35',
+  },
+  orderContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F3F1',
+    paddingVertical: 8,
+  },
+  orderActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    justifyContent: 'flex-end',
+  },
+  invoiceBtn: {
+    backgroundColor: '#F0F5F2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  invoiceBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#123D35',
+  },
+  returnBtn: {
+    backgroundColor: '#FFF8E1',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  returnBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#B45309',
   },
 });

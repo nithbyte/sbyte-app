@@ -28,6 +28,7 @@ interface LocationContextType {
   isResolving: boolean;
   deliveryInstructions: string;
   setDeliveryInstructions: (instructions: string) => void;
+  selectStore: (store: StoreDto) => void;
   selectStoreByCode: (code: string) => void;
   selectAddress: (address: DeliveryAddress) => Promise<void>;
   addNewAddress: (address: Omit<DeliveryAddress, 'id'>) => Promise<DeliveryAddress>;
@@ -79,6 +80,36 @@ const DEFAULT_ADDRESSES: DeliveryAddress[] = [
     latitude: 8.7335,
     longitude: 77.6985,
     deliveryInstructions: 'Elderly at home - please be gentle',
+    isDefault: false,
+  },
+  {
+    id: 'addr-ngl-vadasery',
+    tag: 'HOME',
+    recipientName: 'Sundar Pitchai',
+    phone: '+91 94431 88776',
+    streetAddress: '12 Christopher Road, Near Vadasery Bus Stand',
+    landmark: 'Behind Clock Tower',
+    locality: 'Vadasery',
+    city: 'Nagercoil',
+    postalCode: '629001',
+    latitude: 8.1833,
+    longitude: 77.4119,
+    deliveryInstructions: 'Doorbell on the right gate',
+    isDefault: false,
+  },
+  {
+    id: 'addr-ngl-kottar',
+    tag: 'WORK',
+    recipientName: 'Sundar Pitchai',
+    phone: '+91 94431 88776',
+    streetAddress: '88 Market Road, Kottar Bazaar',
+    landmark: 'Opposite Chettiar Complex',
+    locality: 'Kottar',
+    city: 'Nagercoil',
+    postalCode: '629002',
+    latitude: 8.1714,
+    longitude: 77.4335,
+    deliveryInstructions: 'Commercial building floor 1',
     isDefault: false,
   },
 ];
@@ -209,19 +240,23 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return newAddress;
   };
 
+  const selectStore = (store: StoreDto) => {
+    setCurrentStore(store);
+    setServiceability({
+      serviceable: true,
+      storeId: store.id,
+      storeName: store.name,
+      storeCode: store.code,
+      distanceKm: 1.2,
+      deliveryEstimateMin: store.deliveryEstimateMin,
+      message: `Express ${store.deliveryEstimateMin}-Min Delivery from ${store.name}`,
+    });
+  };
+
   const selectStoreByCode = (code: string) => {
     const store = availableStores.find((s) => s.code === code);
     if (store) {
-      setCurrentStore(store);
-      setServiceability({
-        serviceable: true,
-        storeId: store.id,
-        storeName: store.name,
-        storeCode: store.code,
-        distanceKm: 1.2,
-        deliveryEstimateMin: store.deliveryEstimateMin,
-        message: `Express ${store.deliveryEstimateMin}-Min Delivery from ${store.name}`,
-      });
+      selectStore(store);
     }
   };
 
@@ -245,6 +280,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isResolving,
         deliveryInstructions,
         setDeliveryInstructions,
+        selectStore,
         selectStoreByCode,
         selectAddress,
         addNewAddress,

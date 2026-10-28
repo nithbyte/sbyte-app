@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { ProductCategory, UnitOfMeasure } from '@sbyte/shared-types';
 import { theme } from '../theme/tokens';
 import { useCart } from '../context/CartContext';
 import { useLocation } from '../context/LocationContext';
@@ -45,6 +46,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({
 
   const [inputCoupon, setInputCoupon] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [redeemPoints, setRedeemPoints] = useState(false);
+  const [allowSubstitutions, setAllowSubstitutions] = useState(true);
+
+  const pointsDiscount = redeemPoints ? Math.min(25, Math.floor(subtotal * 0.2)) : 0;
+  const finalPayAmount = Math.max(0, totalAmount - pointsDiscount);
 
   const handleApply = async (codeToApply?: string) => {
     const code = codeToApply || inputCoupon;
@@ -218,6 +224,80 @@ export const CartScreen: React.FC<CartScreenProps> = ({
           )}
         </View>
 
+        {/* Loyalty Points Redemption */}
+        <View style={styles.loyaltyRedeemCard}>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+            onPress={() => setRedeemPoints(!redeemPoints)}
+          >
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text style={styles.loyaltyRedeemTitle}>⭐ Redeem S BYTE Loyalty Points</Text>
+              <Text style={styles.loyaltyRedeemSub}>
+                {redeemPoints
+                  ? `Redeemed 250 points! Saving ₹${pointsDiscount}.`
+                  : `You have 250 points available. Tap to save ₹${Math.min(25, Math.floor(subtotal * 0.2))}.`}
+              </Text>
+            </View>
+            <View style={[styles.checkbox, redeemPoints && styles.checkboxActive]}>
+              {redeemPoints && <Text style={{ color: '#123D35', fontWeight: '900', fontSize: 12 }}>✓</Text>}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Smart Item Substitution Consent */}
+        <View style={styles.substitutionCard}>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+            onPress={() => setAllowSubstitutions(!allowSubstitutions)}
+          >
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text style={styles.substTitle}>🔄 Smart Item Substitutions</Text>
+              <Text style={styles.substSub}>
+                {allowSubstitutions
+                  ? 'Consent granted: Store staff will replace any out-of-stock item with an equivalent or premium brand.'
+                  : 'No substitutions: Out-of-stock items will be instantly refunded to your original payment method.'}
+              </Text>
+            </View>
+            <View style={[styles.checkbox, allowSubstitutions && styles.checkboxActive]}>
+              {allowSubstitutions && <Text style={{ color: '#123D35', fontWeight: '900', fontSize: 12 }}>✓</Text>}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Frequently Bought Together Recommendation */}
+        <View style={styles.recommendCard}>
+          <Text style={styles.sectionHeading}>🌟 Frequently Bought Together</Text>
+          <View style={styles.recommendRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.recommendTitle}>Nannari Herbal Sarbath Syrup (750ml)</Text>
+              <Text style={styles.recommendSubtitle}>Traditional cool refreshment • Tirunelveli special</Text>
+              <Text style={styles.recommendPrice}>₹125</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.recommendAddBtn}
+              onPress={() => {
+                addToCart({
+                  id: 'prod-bev-002',
+                  sku: 'BEV-NAN-750',
+                  name: 'Nannari Herbal Sarbath Syrup (750ml)',
+                  tamilName: 'நன்னாரி மூலிகை சர்பத்',
+                  description: 'Authentic Nannari root herbal syrup.',
+                  category: ProductCategory.BEVERAGES,
+                  brand: 'Nellai Naturals',
+                  imageUrl: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400',
+                  unit: UnitOfMeasure.PIECE,
+                  packageSize: '750 ml',
+                  basePrice: 140,
+                  discountPrice: 125,
+                  isVeg: true,
+                });
+              }}
+            >
+              <Text style={styles.recommendAddText}>+ ADD</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Detailed Bill Breakdown */}
         <View style={styles.billCard}>
           <Text style={styles.sectionHeading}>Bill Breakdown</Text>
@@ -241,10 +321,16 @@ export const CartScreen: React.FC<CartScreenProps> = ({
               <Text style={styles.discountVal}>- ₹{discount}</Text>
             </View>
           )}
+          {pointsDiscount > 0 && (
+            <View style={styles.billRow}>
+              <Text style={styles.loyaltyDiscountLabel}>Loyalty Points Redeemed</Text>
+              <Text style={styles.loyaltyDiscountVal}>- ₹{pointsDiscount}</Text>
+            </View>
+          )}
           <View style={styles.divider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Grand Total</Text>
-            <Text style={styles.totalVal}>₹{totalAmount}</Text>
+            <Text style={styles.totalVal}>₹{finalPayAmount}</Text>
           </View>
         </View>
       </ScrollView>
@@ -253,7 +339,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
       <View style={styles.bottomBar}>
         <View>
           <Text style={styles.payLabel}>Total to Pay</Text>
-          <Text style={styles.payVal}>₹{totalAmount}</Text>
+          <Text style={styles.payVal}>₹{finalPayAmount}</Text>
         </View>
         <TouchableOpacity
           style={styles.checkoutBtn}
@@ -659,5 +745,105 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     color: theme.colors.primaryTealDark,
+  },
+  loyaltyRedeemCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E5EAE6',
+  },
+  loyaltyRedeemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#123D35',
+  },
+  loyaltyRedeemSub: {
+    fontSize: 11,
+    color: '#62726B',
+    marginTop: 2,
+  },
+  substitutionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E5EAE6',
+  },
+  substTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#19231F',
+  },
+  substSub: {
+    fontSize: 11,
+    color: '#62726B',
+    marginTop: 2,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#DCE3DF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: '#C8F169',
+    borderColor: '#123D35',
+  },
+  recommendCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E5EAE6',
+  },
+  recommendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  recommendTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#19231F',
+  },
+  recommendSubtitle: {
+    fontSize: 10,
+    color: '#62726B',
+    marginTop: 1,
+  },
+  recommendPrice: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#123D35',
+    marginTop: 4,
+  },
+  recommendAddBtn: {
+    backgroundColor: '#123D35',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  recommendAddText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#C8F169',
+  },
+  loyaltyDiscountLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  loyaltyDiscountVal: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#15803D',
   },
 });

@@ -28,7 +28,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenProductDetail,
   onSelectCategoryTab,
 }) => {
-  const { currentStore, currentAddress, serviceability } = useLocation();
+  const { currentStore, availableStores, selectStore, currentAddress, serviceability } = useLocation();
   const { cart, addToCart, removeFromCart } = useCart();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -198,6 +198,56 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             ))}
           </View>
         </View>
+
+        {/* Marketplace Shop Discovery Strip */}
+        {availableStores && availableStores.length > 0 && (
+          <View style={styles.shopsSection}>
+            <View style={styles.shopsHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.shopsEmoji}>🏪</Text>
+                <Text style={styles.shopsTitle}>Local Supermarkets & Shops</Text>
+              </View>
+              <Text style={styles.shopsSubBadge}>{availableStores.length} AVAILABLE</Text>
+            </View>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.shopsScroll}>
+              {availableStores.map((store) => {
+                const isSelected = currentStore?.id === store.id;
+                return (
+                  <TouchableOpacity
+                    key={store.id}
+                    style={[styles.shopCard, isSelected && styles.activeShopCard]}
+                    onPress={() => selectStore(store)}
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.shopTopRow}>
+                      <Text style={styles.shopIcon}>🏬</Text>
+                      {isSelected ? (
+                        <View style={styles.activePill}>
+                          <Text style={styles.activePillText}>SHOPPING HERE</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.switchPill}>
+                          <Text style={styles.switchPillText}>SELECT SHOP</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.shopName} numberOfLines={1}>
+                      {store.name}
+                    </Text>
+                    <Text style={styles.shopLocality} numberOfLines={1}>
+                      📍 {store.locality || store.city}
+                    </Text>
+                    <View style={styles.shopMetaRow}>
+                      <Text style={styles.shopEta}>⚡ {store.deliveryEstimateMin || 15} mins</Text>
+                      <Text style={styles.shopMinOrder}>Min ₹{store.minOrderAmount || 99}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Category Horizontal Quick Strip */}
         <View style={styles.categorySection}>
@@ -578,5 +628,108 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     maxWidth: 240,
+  },
+  shopsSection: {
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+  shopsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  shopsEmoji: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  shopsTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: theme.colors.textInk,
+  },
+  shopsSubBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: theme.colors.primaryTeal,
+    backgroundColor: theme.colors.accentLimeSubtle,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  shopsScroll: {
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  shopCard: {
+    width: 200,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+  },
+  activeShopCard: {
+    borderColor: theme.colors.primaryTeal,
+    backgroundColor: '#F0FDF4',
+  },
+  shopTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  shopIcon: {
+    fontSize: 18,
+  },
+  activePill: {
+    backgroundColor: theme.colors.primaryTeal,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  activePillText: {
+    color: '#FFF9EF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  switchPill: {
+    backgroundColor: '#E5E7EB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  switchPillText: {
+    color: '#4B5563',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  shopName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.textInk,
+  },
+  shopLocality: {
+    fontSize: 11,
+    color: theme.colors.textMuted,
+    marginTop: 2,
+  },
+  shopMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+  },
+  shopEta: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.colors.primaryTeal,
+  },
+  shopMinOrder: {
+    fontSize: 11,
+    color: theme.colors.textMuted,
   },
 });

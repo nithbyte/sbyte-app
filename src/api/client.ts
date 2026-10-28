@@ -46,6 +46,8 @@ export interface CheckoutPayload {
   paymentMethod: PaymentMethod;
   customerNotes?: string;
   idempotencyKey?: string;
+  redeemLoyaltyPoints?: number;
+  allowSubstitutions?: boolean;
 }
 
 class ApiClient {
@@ -281,6 +283,20 @@ class ApiClient {
     return this.request<StoreDto[]>('/stores', { method: 'GET' }, defaultStores);
   }
 
+  // --- Marketplace Shops Discovery ---
+  async getMarketplaceShops(params?: {
+    latitude?: number;
+    longitude?: number;
+    pincode?: string;
+  }): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (params?.latitude !== undefined) q.append('latitude', params.latitude.toString());
+    if (params?.longitude !== undefined) q.append('longitude', params.longitude.toString());
+    if (params?.pincode) q.append('pincode', params.pincode);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.request<any[]>(`/tenants/marketplace/shops${qs}`, { method: 'GET' }, []);
+  }
+
   async resolveServiceability(latitude: number, longitude: number): Promise<ServiceabilityResult> {
     try {
       return await this.request<ServiceabilityResult>('/stores/resolve-serviceability', {
@@ -351,6 +367,7 @@ class ApiClient {
   // --- Products Catalog ---
   async getProducts(params?: {
     storeId?: string;
+    tenantId?: string;
     categoryId?: string;
     search?: string;
     limit?: number;
@@ -358,6 +375,7 @@ class ApiClient {
   }): Promise<{ items: ProductSummary[]; total: number }> {
     const qs = new URLSearchParams();
     if (params?.storeId) qs.append('storeId', params.storeId);
+    if (params?.tenantId) qs.append('tenantId', params.tenantId);
     if (params?.categoryId && params.categoryId !== 'ALL') qs.append('categoryId', params.categoryId);
     if (params?.search) qs.append('search', params.search);
     if (params?.limit) qs.append('limit', String(params.limit));
@@ -484,6 +502,102 @@ class ApiClient {
   // --- Notifications ---
   async getNotifications(): Promise<any[]> {
     return this.request<any[]>('/notifications', { method: 'GET' }, []);
+  }
+
+  // --- Loyalty & Rewards ---
+  async getLoyaltyAccount(): Promise<any> {
+    return this.request('/loyalty/account', { method: 'GET' });
+  }
+
+  async getLoyaltyLedger(): Promise<any[]> {
+    return this.request<any[]>('/loyalty/ledger', { method: 'GET' }, []);
+  }
+
+  async applyReferralCode(referralCode: string): Promise<any> {
+    return this.request('/loyalty/referral', {
+      method: 'POST',
+      body: JSON.stringify({ referralCode }),
+    });
+  }
+
+  async redeemLoyaltyPoints(points: number, orderSubtotal: number): Promise<any> {
+    return this.request('/loyalty/redeem', {
+      method: 'POST',
+      body: JSON.stringify({ points, orderSubtotal }),
+    });
+  }
+
+  // --- Customer Convenience ---
+  async getFavorites(): Promise<any[]> {
+    return this.request<any[]>('/convenience/favorites', { method: 'GET' }, []);
+  }
+
+  async toggleFavorite(productId: string): Promise<any> {
+    return this.request(`/convenience/favorites/${productId}`, { method: 'POST' });
+  }
+
+  async getShoppingLists(): Promise<any[]> {
+    return this.request<any[]>('/convenience/lists', { method: 'GET' }, []);
+  }
+
+  async createShoppingList(title: string, description?: string): Promise<any> {
+    return this.request('/convenience/lists', {
+      method: 'POST',
+      body: JSON.stringify({ title, description }),
+    });
+  }
+
+  async addShoppingListItem(listId: string, variantId: string, quantity = 1): Promise<any> {
+    return this.request(`/convenience/lists/${listId}/items`, {
+      method: 'POST',
+      body: JSON.stringify({ variantId, quantity }),
+    });
+  }
+
+  async removeShoppingListItem(listId: string, itemId: string): Promise<any> {
+    return this.request(`/convenience/lists/${listId}/items/${itemId}`, { method: 'DELETE' });
+  }
+
+  async getRecentPurchases(storeId?: string): Promise<any[]> {
+    const qs = storeId ? `?storeId=${storeId}` : '';
+    return this.request<any[]>(`/convenience/recent-purchases${qs}`, { method: 'GET' }, []);
+  }
+
+  async getFrequentlyBoughtTogether(variantId: string): Promise<any[]> {
+    return this.request<any[]>(`/convenience/frequently-bought-together/${variantId}`, { method: 'GET' }, []);
+  }
+
+  async getShoppingReminders(): Promise<any[]> {
+    return this.request<any[]>('/convenience/reminders', { method: 'GET' }, []);
+  }
+
+  async createShoppingReminder(payload: { title: string; frequencyDays: number; variantIds?: string[] }): Promise<any> {
+    return this.request('/convenience/reminders', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  // --- Returns & Invoices ---
+  async createReturnRequest(payload: {
+    orderId: string;
+    orderItemId: string;
+    quantity: number;
+    reason: string;
+    photoUrls?: string[];
+  }): Promise<any> {
+    return this.request('/support/returns', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getMyReturnRequests(): Promise<any[]> {
+    return this.request<any[]>('/support/returns/my', { method: 'GET' }, []);
+  }
+
+  async getOrderInvoice(orderId: string): Promise<any> {
+    return this.request(`/business-config/invoices/${orderId}`, { method: 'GET' });
   }
 }
 
