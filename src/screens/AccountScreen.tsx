@@ -8,9 +8,11 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
 import { useAuth } from '../context/AuthContext';
 import { useLocation } from '../context/LocationContext';
+import { SByteLogo } from '../components/SByteLogo';
 import { api, API_BASE_URL } from '../api/client';
 import { OrderSummary } from '@sbyte/shared-types';
 
@@ -48,7 +50,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
   const checkHealth = async () => {
     try {
       const h = await api.checkHealth();
-      setApiHealth({ isLive: h.isLive, status: h.isLive ? 'Connected (Live NestJS)' : 'Dev Fallback (Offline)' });
+      setApiHealth({ isLive: h.isLive, status: h.isLive ? 'Live NestJS Server' : 'Offline' });
     } catch {
       setApiHealth({ isLive: false, status: 'Dev Fallback (Offline)' });
     }
@@ -60,7 +62,6 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
       const list = await api.getOrders();
       setOrders(list);
     } catch {
-      // Default sample order if server empty
       setOrders([]);
     } finally {
       setIsLoadingOrders(false);
@@ -84,8 +85,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
     <View style={styles.container}>
       {/* Top Header */}
       <View style={styles.topHeader}>
-        <Text style={styles.title}>Account & Settings</Text>
-        <Text style={styles.subTitle}>S BYTE Quick Commerce • Tirunelveli</Text>
+        <SByteLogo variant="compact" size={32} light={true} />
+        <View style={styles.slaBadge}>
+          <Ionicons name="shield-checkmark" size={13} color="#0D2D27" />
+          <Text style={styles.slaText}>Secure Account</Text>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -100,6 +104,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
               <Text style={styles.profilePhone}>{user.phone}</Text>
               {user.email && <Text style={styles.profileEmail}>{user.email}</Text>}
               <View style={styles.customerPill}>
+                <Ionicons name="checkmark-circle" size={12} color="#123D35" />
                 <Text style={styles.customerPillText}>Verified Customer</Text>
               </View>
             </View>
@@ -109,11 +114,12 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             <View style={{ flex: 1 }}>
               <Text style={styles.guestTitle}>Welcome to S BYTE</Text>
               <Text style={styles.guestSub}>
-                Sign in to view orders, loyalty points, and faster checkout.
+                Sign in to view orders, reward points, and superfast checkout.
               </Text>
             </View>
-            <TouchableOpacity style={styles.signInBtn} onPress={onOpenAuth}>
+            <TouchableOpacity style={styles.signInBtn} onPress={onOpenAuth} activeOpacity={0.85}>
               <Text style={styles.signInBtnText}>Sign In</Text>
+              <Ionicons name="arrow-forward" size={14} color="#0D2D27" />
             </TouchableOpacity>
           </View>
         )}
@@ -122,9 +128,12 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
         {isAuthenticated && (
           <View style={styles.loyaltyCard}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <View>
-                <Text style={styles.loyaltyTitle}>⭐ S BYTE Loyalty Club</Text>
-                <Text style={styles.loyaltySub}>Earn 1 pt per ₹10 spent • 1 pt = ₹0.10 discount</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="star" size={18} color="#FFB300" />
+                <View>
+                  <Text style={styles.loyaltyTitle}>S BYTE Loyalty Club</Text>
+                  <Text style={styles.loyaltySub}>1 pt per ₹10 spent • 1 pt = ₹0.10 off</Text>
+                </View>
               </View>
               <View style={styles.tierPill}>
                 <Text style={styles.tierPillText}>SILVER TIER</Text>
@@ -137,7 +146,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
                 <Text style={styles.pointsLabel}>Reward Points (Worth ₹25.00)</Text>
               </View>
               <View style={styles.referralBox}>
-                <Text style={styles.referralLabel}>Your Referral Code</Text>
+                <Text style={styles.referralLabel}>Referral Code</Text>
                 <Text style={styles.referralCode}>SB944330</Text>
               </View>
             </View>
@@ -147,20 +156,43 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
         {/* Customer Convenience Hub */}
         {isAuthenticated && (
           <View style={styles.convenienceGrid}>
-            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Saved Favorites', 'Browse your frequently purchased staples and favorites.')}>
-              <Text style={styles.convenienceIcon}>❤️</Text>
+            <TouchableOpacity
+              style={styles.convenienceItem}
+              onPress={() => Alert.alert('Saved Favorites', 'Browse your frequently purchased staples and favorites.')}
+            >
+              <View style={[styles.convIconCircle, { backgroundColor: '#FDE8E8' }]}>
+                <Ionicons name="heart" size={18} color="#E02424" />
+              </View>
               <Text style={styles.convenienceText}>Favorites</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Shopping Lists', 'Create reusable grocery and household shopping lists.')}>
-              <Text style={styles.convenienceIcon}>📋</Text>
+
+            <TouchableOpacity
+              style={styles.convenienceItem}
+              onPress={() => Alert.alert('Shopping Lists', 'Create reusable grocery and household shopping lists.')}
+            >
+              <View style={[styles.convIconCircle, { backgroundColor: '#E1EFFE' }]}>
+                <Ionicons name="list" size={18} color="#1A56DB" />
+              </View>
               <Text style={styles.convenienceText}>My Lists</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Reminders', 'Configure weekly or monthly grocery replenishment reminders.')}>
-              <Text style={styles.convenienceIcon}>⏰</Text>
+
+            <TouchableOpacity
+              style={styles.convenienceItem}
+              onPress={() => Alert.alert('Reminders', 'Configure weekly or monthly grocery replenishment reminders.')}
+            >
+              <View style={[styles.convIconCircle, { backgroundColor: '#EDF2F7' }]}>
+                <Ionicons name="time" size={18} color="#3182CE" />
+              </View>
               <Text style={styles.convenienceText}>Reminders</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.convenienceItem} onPress={() => Alert.alert('Returns & Refunds', 'Track and request returns on eligible delivered items.')}>
-              <Text style={styles.convenienceIcon}>↩️</Text>
+
+            <TouchableOpacity
+              style={styles.convenienceItem}
+              onPress={() => Alert.alert('Returns & Refunds', 'Track and request returns on eligible delivered items.')}
+            >
+              <View style={[styles.convIconCircle, { backgroundColor: '#E6FFFA' }]}>
+                <Ionicons name="repeat" size={18} color="#234E52" />
+              </View>
               <Text style={styles.convenienceText}>Returns</Text>
             </TouchableOpacity>
           </View>
@@ -169,7 +201,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
         {/* Orders Section */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>📦 Recent Orders</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="receipt" size={16} color="#123D35" />
+              <Text style={styles.sectionTitle}>Recent Orders</Text>
+            </View>
             {isAuthenticated && (
               <TouchableOpacity onPress={loadOrders}>
                 <Text style={styles.refreshLink}>Refresh</Text>
@@ -213,7 +248,8 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
                       }
                     }}
                   >
-                    <Text style={styles.invoiceBtnText}>📄 Tax Invoice</Text>
+                    <Ionicons name="document-text-outline" size={12} color="#123D35" style={{ marginRight: 4 }} />
+                    <Text style={styles.invoiceBtnText}>Tax Invoice</Text>
                   </TouchableOpacity>
 
                   {ord.status === 'DELIVERED' && (
@@ -221,7 +257,8 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
                       style={styles.returnBtn}
                       onPress={() => onOpenSupportModal(ord.id)}
                     >
-                      <Text style={styles.returnBtnText}>↩️ Return Item</Text>
+                      <Ionicons name="arrow-undo-outline" size={12} color="#7B8A84" style={{ marginRight: 4 }} />
+                      <Text style={styles.returnBtnText}>Return Item</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -243,12 +280,14 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             onPress={onOpenAddressModal}
             activeOpacity={0.7}
           >
-            <Text style={styles.menuIcon}>📍</Text>
+            <View style={styles.menuIconWrap}>
+              <Ionicons name="location" size={18} color="#123D35" />
+            </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.menuTitle}>Saved Delivery Addresses</Text>
               <Text style={styles.menuSub}>{savedAddresses.length} addresses configured</Text>
             </View>
-            <Text style={styles.menuArrow}>›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#8A9993" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -258,19 +297,23 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             onPress={() => onOpenSupportModal()}
             activeOpacity={0.7}
           >
-            <Text style={styles.menuIcon}>💬</Text>
+            <View style={styles.menuIconWrap}>
+              <Ionicons name="chatbubbles" size={18} color="#123D35" />
+            </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.menuTitle}>Help & Support Desk</Text>
               <Text style={styles.menuSub}>Store helpline: 0462-2500000</Text>
             </View>
-            <Text style={styles.menuArrow}>›</Text>
+            <Ionicons name="chevron-forward" size={16} color="#8A9993" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
           {/* Language Toggle */}
           <View style={styles.menuRow}>
-            <Text style={styles.menuIcon}>🌐</Text>
+            <View style={styles.menuIconWrap}>
+              <Ionicons name="globe" size={18} color="#123D35" />
+            </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.menuTitle}>App Language</Text>
               <Text style={styles.menuSub}>English & தமிழ்</Text>
@@ -299,7 +342,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
         {/* Platform Connectivity Info */}
         <View style={styles.apiInfoCard}>
           <View style={styles.apiHeaderRow}>
-            <Text style={styles.apiTitle}>📡 API Connectivity</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="radio" size={16} color="#123D35" />
+              <Text style={styles.apiTitle}>API Connectivity</Text>
+            </View>
             <View
               style={[
                 styles.healthBadge,
@@ -317,14 +363,16 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             </View>
           </View>
           <Text style={styles.apiUrlText}>Endpoint: {API_BASE_URL}</Text>
-          <TouchableOpacity style={styles.pingBtn} onPress={checkHealth}>
+          <TouchableOpacity style={styles.pingBtn} onPress={checkHealth} activeOpacity={0.8}>
+            <Ionicons name="refresh" size={13} color="#123D35" style={{ marginRight: 4 }} />
             <Text style={styles.pingBtnText}>Test Server Connection</Text>
           </TouchableOpacity>
         </View>
 
         {/* Logout Button */}
         {isAuthenticated && (
-          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.85}>
+            <Ionicons name="log-out-outline" size={16} color="#E02424" style={{ marginRight: 6 }} />
             <Text style={styles.logoutBtnText}>Sign Out</Text>
           </TouchableOpacity>
         )}
@@ -336,110 +384,225 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bgCream,
+    backgroundColor: '#F8F9F7',
   },
   topHeader: {
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0E332C',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 14,
+    paddingTop: 12,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFF',
-  },
-  subTitle: {
-    fontSize: 11,
-    color: '#AABEB6',
-    marginTop: 2,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 110,
-  },
-  profileCard: {
+  slaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.bgCard,
+    gap: 4,
+    backgroundColor: theme.colors.accentLime,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  slaText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#0D2D27',
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 90,
+  },
+  profileCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
   },
   avatarCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: theme.colors.accentLime,
+    backgroundColor: '#0E332C',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
+    color: theme.colors.accentLime,
     fontSize: 22,
     fontWeight: '900',
-    color: theme.colors.primaryTealDark,
   },
   profileName: {
     fontSize: 16,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   profilePhone: {
     fontSize: 12,
-    color: theme.colors.textSlate,
-    marginTop: 1,
+    color: '#6E7D77',
+    marginTop: 2,
   },
   profileEmail: {
     fontSize: 11,
-    color: theme.colors.textMuted,
+    color: '#8A9993',
+    marginTop: 1,
   },
   customerPill: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F2FBDD',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 4,
-  },
-  customerPillText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: theme.colors.primaryTealDark,
-  },
-  guestCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.bgCard,
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(200, 241, 105, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  customerPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#0D2D27',
+  },
+  guestCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
   },
   guestTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   guestSub: {
-    fontSize: 11,
-    color: theme.colors.textSlate,
-    marginTop: 2,
+    fontSize: 12,
+    color: '#6E7D77',
+    marginTop: 4,
   },
   signInBtn: {
     backgroundColor: theme.colors.accentLime,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   signInBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: theme.colors.primaryTealDark,
+    color: '#0D2D27',
+    fontWeight: '900',
+    fontSize: 12,
   },
-  sectionCard: {
-    backgroundColor: theme.colors.bgCard,
+  loyaltyCard: {
+    backgroundColor: '#0E332C',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 241, 105, 0.3)',
+  },
+  loyaltyTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  loyaltySub: {
+    fontSize: 10,
+    color: '#B2C4BD',
+    marginTop: 2,
+  },
+  tierPill: {
+    backgroundColor: theme.colors.accentLime,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  tierPillText: {
+    color: '#0D2D27',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  loyaltyBalanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  pointsNumber: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: theme.colors.accentLime,
+  },
+  pointsLabel: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  referralBox: {
+    alignItems: 'flex-end',
+  },
+  referralLabel: {
+    fontSize: 9,
+    color: '#B2C4BD',
+    textTransform: 'uppercase',
+  },
+  referralCode: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: theme.colors.accentLime,
+    letterSpacing: 0.8,
+  },
+  convenienceGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  convenienceItem: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
+  },
+  convIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  convenienceText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#2C3A35',
+  },
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -450,109 +613,163 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   refreshLink: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: theme.colors.primaryTeal,
+    color: '#123D35',
+  },
+  orderContainer: {
+    backgroundColor: '#F9FAF9',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#EAEFEA',
   },
   orderRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: theme.colors.borderLight,
   },
   orderNum: {
     fontSize: 13,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   orderStore: {
     fontSize: 11,
-    color: theme.colors.textSlate,
+    color: '#6E7D77',
+    marginTop: 2,
   },
   orderItemsCount: {
     fontSize: 11,
+    color: '#123D35',
     fontWeight: '600',
-    color: theme.colors.primaryTeal,
-    marginTop: 1,
+    marginTop: 2,
   },
   statusPill: {
-    backgroundColor: theme.colors.bgMuted,
+    backgroundColor: 'rgba(18, 61, 53, 0.1)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   statusText: {
     fontSize: 10,
     fontWeight: '800',
-    color: theme.colors.textCharcoal,
+    color: '#123D35',
+  },
+  orderActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#EFF3F0',
+  },
+  invoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D8DFDA',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  invoiceBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#123D35',
+  },
+  returnBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D8DFDA',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  returnBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#55655E',
   },
   emptyOrdersText: {
     fontSize: 12,
-    color: theme.colors.textSlate,
-    paddingVertical: 8,
+    color: '#8A9993',
+    textAlign: 'center',
+    marginVertical: 14,
   },
   menuCard: {
-    backgroundColor: theme.colors.bgCard,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
+    padding: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
   },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 8,
   },
-  menuIcon: {
-    fontSize: 18,
+  menuIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#EBF2EE',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   menuSub: {
     fontSize: 11,
-    color: theme.colors.textMuted,
-  },
-  menuArrow: {
-    fontSize: 18,
-    color: theme.colors.textMuted,
+    color: '#7B8A84',
+    marginTop: 1,
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
+    backgroundColor: '#F0F3F1',
+    marginHorizontal: 8,
   },
   langToggle: {
     flexDirection: 'row',
-    backgroundColor: theme.colors.bgMuted,
+    backgroundColor: '#F0F3F1',
     borderRadius: 8,
     padding: 2,
   },
   langBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   activeLangBtn: {
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0E332C',
   },
   langText: {
     fontSize: 11,
     fontWeight: '700',
-    color: theme.colors.textSlate,
+    color: '#55655E',
   },
   activeLangText: {
     color: theme.colors.accentLime,
   },
   apiInfoCard: {
-    backgroundColor: theme.colors.bgCard,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E7ECE9',
   },
   apiHeaderRow: {
     flexDirection: 'row',
@@ -563,173 +780,61 @@ const styles = StyleSheet.create({
   apiTitle: {
     fontSize: 13,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   healthBadge: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 6,
   },
   healthLive: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#DEF7EC',
   },
   healthOffline: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FDE8E8',
   },
   healthText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '800',
   },
   healthLiveText: {
-    color: '#15803D',
+    color: '#03543F',
   },
   healthOfflineText: {
-    color: '#B45309',
+    color: '#9B1C1C',
   },
   apiUrlText: {
-    fontSize: 11,
-    color: theme.colors.textSlate,
-    fontFamily: 'monospace',
-    marginBottom: 8,
+    fontSize: 10,
+    color: '#8A9993',
   },
   pingBtn: {
-    backgroundColor: theme.colors.bgMuted,
-    paddingVertical: 8,
-    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#F0F4F2',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
   },
   pingBtnText: {
     fontSize: 11,
     fontWeight: '700',
-    color: theme.colors.primaryTeal,
+    color: '#123D35',
   },
   logoutBtn: {
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 14,
+    backgroundColor: '#FDE8E8',
     borderRadius: 12,
+    paddingVertical: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F8B4B4',
   },
   logoutBtnText: {
+    color: '#E02424',
     fontSize: 13,
     fontWeight: '800',
-    color: '#DC2626',
-  },
-  loyaltyCard: {
-    backgroundColor: '#123D35',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-  },
-  loyaltyTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#C8F169',
-  },
-  loyaltySub: {
-    fontSize: 11,
-    color: '#AABEB6',
-    marginTop: 2,
-  },
-  tierPill: {
-    backgroundColor: 'rgba(200, 241, 105, 0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#C8F169',
-  },
-  tierPillText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#C8F169',
-  },
-  loyaltyBalanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  pointsNumber: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  pointsLabel: {
-    fontSize: 11,
-    color: '#AABEB6',
-  },
-  referralBox: {
-    alignItems: 'flex-end',
-  },
-  referralLabel: {
-    fontSize: 10,
-    color: '#AABEB6',
-  },
-  referralCode: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#C8F169',
-    fontFamily: 'monospace',
-    marginTop: 2,
-  },
-  convenienceGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-    gap: 8,
-  },
-  convenienceItem: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5EAE6',
-  },
-  convenienceIcon: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  convenienceText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#123D35',
-  },
-  orderContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F3F1',
-    paddingVertical: 8,
-  },
-  orderActionRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    justifyContent: 'flex-end',
-  },
-  invoiceBtn: {
-    backgroundColor: '#F0F5F2',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  invoiceBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#123D35',
-  },
-  returnBtn: {
-    backgroundColor: '#FFF8E1',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  returnBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#B45309',
   },
 });

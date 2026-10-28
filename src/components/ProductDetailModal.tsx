@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
 import { ProductSummary } from '@sbyte/shared-types';
 import { useCart } from '../context/CartContext';
@@ -48,8 +49,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <View style={styles.dragPill} />
 
           <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
+              <Ionicons name="close" size={20} color="#16231F" />
             </TouchableOpacity>
           </View>
 
@@ -62,6 +63,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <Text style={styles.discountText}>{discountPct}% OFF</Text>
                 </View>
               )}
+              <View style={styles.vegBadge}>
+                <View style={styles.vegDot} />
+              </View>
             </View>
 
             {/* Title & Brand */}
@@ -92,7 +96,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <TouchableOpacity
                   style={styles.addButton}
                   onPress={() => addToCart(product)}
+                  activeOpacity={0.85}
                 >
+                  <Ionicons name="cart" size={14} color="#0D2D27" style={{ marginRight: 4 }} />
                   <Text style={styles.addButtonText}>ADD TO CART</Text>
                 </TouchableOpacity>
               ) : (
@@ -100,15 +106,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <TouchableOpacity
                     style={styles.qtyBtn}
                     onPress={() => removeFromCart(product.id)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.qtyBtnText}>-</Text>
+                    <Ionicons name="remove" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                   <Text style={styles.qtyNumber}>{currentQty}</Text>
                   <TouchableOpacity
                     style={styles.qtyBtn}
                     onPress={() => addToCart(product)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.qtyBtnText}>+</Text>
+                    <Ionicons name="add" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
               )}
@@ -116,7 +124,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
             {/* SLA Delivery Guarantee */}
             <View style={styles.slaCard}>
-              <Text style={styles.slaIcon}>⚡</Text>
+              <View style={styles.slaIconWrap}>
+                <Ionicons name="flash" size={16} color="#0D2D27" />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.slaTitle}>Express 15-Minute Delivery</Text>
                 <Text style={styles.slaSubtitle}>
@@ -226,6 +236,25 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
   },
+  vegBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#1E8E3E',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vegDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1E8E3E',
+  },
   titleSection: {
     marginBottom: 16,
   },
@@ -323,10 +352,15 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 16,
+    gap: 10,
   },
-  slaIcon: {
-    fontSize: 20,
-    marginRight: 10,
+  slaIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.accentLime,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   slaTitle: {
     fontSize: 13,

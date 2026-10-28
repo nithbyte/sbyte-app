@@ -7,9 +7,11 @@ import {
   Image,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
 import { MOBILE_CATEGORIES, MOBILE_PRODUCTS } from '../data/mockData';
 import { useCart } from '../context/CartContext';
+import { SByteLogo } from '../components/SByteLogo';
 import { ProductSummary } from '@sbyte/shared-types';
 
 interface CategoriesScreenProps {
@@ -36,8 +38,17 @@ export const CategoriesScreen: React.FC<CategoriesScreenProps> = ({
     <View style={styles.container}>
       {/* Top Header */}
       <View style={styles.topHeader}>
-        <Text style={styles.title}>All Categories</Text>
-        <Text style={styles.subTitle}>Explore mini-supermarket departments</Text>
+        <View style={styles.headerLeft}>
+          <SByteLogo variant="icon" size={28} />
+          <View>
+            <Text style={styles.title}>Supermarket Aisle</Text>
+            <Text style={styles.subTitle}>Explore all fresh & grocery departments</Text>
+          </View>
+        </View>
+        <View style={styles.slaBadge}>
+          <Ionicons name="flash" size={12} color="#0D2D27" />
+          <Text style={styles.slaText}>15 MINS</Text>
+        </View>
       </View>
 
       <View style={styles.contentRow}>
@@ -58,7 +69,11 @@ export const CategoriesScreen: React.FC<CategoriesScreenProps> = ({
                     isSelected && styles.activeIconCircle,
                   ]}
                 >
-                  <Text style={styles.sidebarIcon}>{cat.icon}</Text>
+                  <Ionicons
+                    name={cat.vectorIcon}
+                    size={18}
+                    color={isSelected ? theme.colors.accentLime : '#52625B'}
+                  />
                 </View>
                 <Text
                   style={[
@@ -69,21 +84,31 @@ export const CategoriesScreen: React.FC<CategoriesScreenProps> = ({
                 >
                   {cat.name}
                 </Text>
+                {isSelected && <View style={styles.activeBar} />}
               </TouchableOpacity>
             );
           })}
         </ScrollView>
 
         {/* Right Pane: Products in Category */}
-        <ScrollView style={styles.rightPane} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView
+          style={styles.rightPane}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 110 }}
+        >
           <View style={styles.categoryHeaderCard}>
-            <Text style={styles.catHeading}>{activeCategory.name}</Text>
-            <Text style={styles.catCount}>{categoryProducts.length} items available</Text>
+            <View>
+              <Text style={styles.catHeading}>{activeCategory.name}</Text>
+              <Text style={styles.catCount}>{categoryProducts.length} items ready for dispatch</Text>
+            </View>
+            <View style={styles.catIconWrap}>
+              <Ionicons name={activeCategory.vectorIcon} size={22} color="#123D35" />
+            </View>
           </View>
 
           {categoryProducts.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Text style={styles.emptyIcon}>📦</Text>
+              <Ionicons name="cube-outline" size={40} color="#8C948F" />
               <Text style={styles.emptyText}>No items currently stocked in this department.</Text>
             </View>
           ) : (
@@ -97,47 +122,61 @@ export const CategoriesScreen: React.FC<CategoriesScreenProps> = ({
                   key={prod.id}
                   style={styles.itemRow}
                   onPress={() => onOpenProductDetail(prod)}
-                  activeOpacity={0.85}
+                  activeOpacity={0.88}
                 >
-                  <Image source={{ uri: prod.imageUrl }} style={styles.itemImg} />
+                  <View style={styles.imgWrap}>
+                    <Image source={{ uri: prod.imageUrl }} style={styles.itemImg} />
+                    <View style={styles.vegDotSmall} />
+                  </View>
+
                   <View style={styles.itemInfo}>
                     <Text style={styles.brand}>{prod.brand}</Text>
-                    <Text style={styles.name} numberOfLines={2}>{prod.name}</Text>
+                    <Text style={styles.name} numberOfLines={2}>
+                      {prod.name}
+                    </Text>
                     {prod.tamilName && (
-                      <Text style={styles.tamilName} numberOfLines={1}>{prod.tamilName}</Text>
+                      <Text style={styles.tamilName} numberOfLines={1}>
+                        {prod.tamilName}
+                      </Text>
                     )}
-                    <Text style={styles.packSize}>{prod.packageSize}</Text>
+                    <View style={styles.packBadge}>
+                      <Text style={styles.packSize}>{prod.packageSize}</Text>
+                    </View>
 
                     <View style={styles.priceRow}>
-                      <View>
+                      <View style={styles.priceCol}>
                         <Text style={styles.price}>₹{price}</Text>
                         {hasDiscount && (
                           <Text style={styles.mrp}>₹{prod.basePrice}</Text>
                         )}
                       </View>
 
-                      {/* Add Button */}
+                      {/* Add Button / Stepper */}
                       {qty === 0 ? (
                         <TouchableOpacity
                           style={styles.addBtn}
                           onPress={() => addToCart(prod)}
+                          activeOpacity={0.8}
                         >
                           <Text style={styles.addBtnText}>ADD</Text>
+                          <Ionicons name="add" size={13} color="#0D2D27" />
                         </TouchableOpacity>
                       ) : (
                         <View style={styles.qtyControl}>
                           <TouchableOpacity
                             style={styles.qtyBtn}
                             onPress={() => removeFromCart(prod.id)}
+                            activeOpacity={0.7}
                           >
-                            <Text style={styles.qtyBtnText}>-</Text>
+                            <Ionicons name="remove" size={12} color="#FFFFFF" />
                           </TouchableOpacity>
                           <Text style={styles.qtyNum}>{qty}</Text>
                           <TouchableOpacity
                             style={styles.qtyBtn}
                             onPress={() => addToCart(prod)}
+                            activeOpacity={0.7}
                           >
-                            <Text style={styles.qtyBtnText}>+</Text>
+                            <Ionicons name="add" size={12} color="#FFFFFF" />
                           </TouchableOpacity>
                         </View>
                       )}
@@ -156,23 +195,47 @@ export const CategoriesScreen: React.FC<CategoriesScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bgCream,
+    backgroundColor: '#F8F9F7',
   },
   topHeader: {
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0E332C',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    paddingTop: 12,
+    paddingBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   subTitle: {
-    fontSize: 12,
-    color: '#AABEB6',
-    marginTop: 2,
+    fontSize: 11,
+    color: '#B0C2BB',
+    marginTop: 1,
+  },
+  slaBadge: {
+    backgroundColor: theme.colors.accentLime,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  slaText: {
+    color: '#0D2D27',
+    fontSize: 10,
+    fontWeight: '900',
   },
   contentRow: {
     flex: 1,
@@ -180,164 +243,224 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     width: 90,
-    backgroundColor: theme.colors.bgMuted,
+    backgroundColor: '#EEF3F0',
     borderRightWidth: 1,
-    borderColor: theme.colors.borderLight,
+    borderRightColor: '#DEE4E1',
   },
   sidebarItem: {
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
+    position: 'relative',
     borderBottomWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderBottomColor: 'rgba(0,0,0,0.03)',
   },
   activeSidebarItem: {
-    backgroundColor: theme.colors.bgCard,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.primaryTeal,
+    backgroundColor: '#FFFFFF',
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFF',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#DFE7E3',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   activeIconCircle: {
-    backgroundColor: theme.colors.accentLimeSubtle,
-  },
-  sidebarIcon: {
-    fontSize: 20,
+    backgroundColor: '#0E332C',
   },
   sidebarName: {
     fontSize: 10,
-    fontWeight: '600',
-    color: theme.colors.textSlate,
+    color: '#55655E',
     textAlign: 'center',
+    fontWeight: '600',
+    lineHeight: 13,
   },
   activeSidebarName: {
-    color: theme.colors.primaryTeal,
+    color: '#0E332C',
     fontWeight: '800',
+  },
+  activeBar: {
+    position: 'absolute',
+    left: 0,
+    top: 8,
+    bottom: 8,
+    width: 3.5,
+    backgroundColor: '#123D35',
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
   },
   rightPane: {
     flex: 1,
     paddingHorizontal: 12,
-    paddingTop: 10,
+    paddingTop: 12,
   },
   categoryHeaderCard: {
-    backgroundColor: theme.colors.bgCard,
-    padding: 12,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E6ECE9',
   },
   catHeading: {
     fontSize: 15,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
   catCount: {
     fontSize: 11,
-    color: theme.colors.textMuted,
+    color: '#7B8A84',
     marginTop: 2,
+  },
+  catIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(200, 241, 105, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyCard: {
     alignItems: 'center',
-    padding: 30,
-  },
-  emptyIcon: {
-    fontSize: 32,
-    marginBottom: 8,
+    paddingVertical: 48,
+    paddingHorizontal: 20,
   },
   emptyText: {
     fontSize: 12,
-    color: theme.colors.textSlate,
+    color: '#7B8A84',
     textAlign: 'center',
+    marginTop: 8,
   },
   itemRow: {
     flexDirection: 'row',
-    backgroundColor: theme.colors.bgCard,
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 10,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E6ECE9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  imgWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    backgroundColor: '#F5F7F5',
+    overflow: 'hidden',
+    position: 'relative',
+    marginRight: 10,
   },
   itemImg: {
-    width: 74,
-    height: 74,
-    borderRadius: 10,
-    backgroundColor: theme.colors.bgMuted,
+    width: '100%',
+    height: '100%',
+  },
+  vegDotSmall: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1E8E3E',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
   itemInfo: {
     flex: 1,
-    marginLeft: 10,
     justifyContent: 'space-between',
   },
   brand: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: theme.colors.textMuted,
+    fontSize: 9,
+    color: '#8A9993',
     textTransform: 'uppercase',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   name: {
     fontSize: 13,
     fontWeight: '700',
-    color: theme.colors.textInk,
+    color: '#16231F',
+    lineHeight: 17,
   },
   tamilName: {
     fontSize: 11,
-    color: theme.colors.primaryTeal,
+    color: '#123D35',
+    fontWeight: '600',
+  },
+  packBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#F0F4F2',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 2,
   },
   packSize: {
-    fontSize: 11,
-    color: theme.colors.textSlate,
+    fontSize: 10,
+    color: '#556660',
+    fontWeight: '700',
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 6,
+  },
+  priceCol: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
   },
   price: {
     fontSize: 14,
-    fontWeight: '800',
-    color: theme.colors.primaryTeal,
+    fontWeight: '900',
+    color: '#102A24',
   },
   mrp: {
-    fontSize: 10,
-    color: theme.colors.textMuted,
+    fontSize: 11,
+    color: '#8F9B96',
     textDecorationLine: 'line-through',
   },
   addBtn: {
     backgroundColor: theme.colors.accentLime,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   addBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: theme.colors.primaryTealDark,
+    color: '#0D2D27',
+    fontSize: 11,
+    fontWeight: '900',
   },
   qtyControl: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0D2D27',
     borderRadius: 8,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    gap: 4,
   },
   qtyBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  qtyBtnText: {
-    color: theme.colors.accentLime,
-    fontSize: 14,
-    fontWeight: '800',
+    padding: 3,
   },
   qtyNum: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '800',
-    paddingHorizontal: 4,
+    color: theme.colors.accentLime,
+    fontSize: 11,
+    fontWeight: '900',
+    minWidth: 14,
+    textAlign: 'center',
   },
 });

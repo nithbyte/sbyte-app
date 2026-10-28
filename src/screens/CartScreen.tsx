@@ -10,9 +10,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { ProductCategory, UnitOfMeasure } from '@sbyte/shared-types';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
 import { useCart } from '../context/CartContext';
 import { useLocation } from '../context/LocationContext';
+import { SByteLogo } from '../components/SByteLogo';
 
 interface CartScreenProps {
   onOpenCheckout: () => void;
@@ -64,13 +66,16 @@ export const CartScreen: React.FC<CartScreenProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyIcon}>🛒</Text>
-          <Text style={styles.emptyTitle}>Your Cart is Empty</Text>
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="cart-outline" size={48} color="#123D35" />
+          </View>
+          <Text style={styles.emptyTitle}>Your Basket is Empty</Text>
           <Text style={styles.emptySub}>
-            Explore fresh vegetables, groceries, snacks, and stationery from S BYTE.
+            Explore farm fresh veggies, groceries, halwa, and daily essentials from S BYTE.
           </Text>
-          <TouchableOpacity style={styles.shopNowBtn} onPress={onNavigateHome}>
-            <Text style={styles.shopNowBtnText}>Start Shopping</Text>
+          <TouchableOpacity style={styles.shopNowBtn} onPress={onNavigateHome} activeOpacity={0.85}>
+            <Text style={styles.shopNowBtnText}>Start 15-Min Shopping</Text>
+            <Ionicons name="arrow-forward" size={15} color="#0D2D27" />
           </TouchableOpacity>
         </View>
       </View>
@@ -83,9 +88,15 @@ export const CartScreen: React.FC<CartScreenProps> = ({
     <View style={styles.container}>
       {/* Top Header */}
       <View style={styles.topHeader}>
-        <Text style={styles.title}>Your Basket ({totalItems} items)</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <SByteLogo variant="compact" size={30} light={true} />
+          <View style={styles.cartCountPill}>
+            <Ionicons name="bag" size={12} color="#0D2D27" />
+            <Text style={styles.cartCountText}>{totalItems} Items</Text>
+          </View>
+        </View>
         <Text style={styles.subTitle}>
-          Fulfilling Store: {currentStore?.name || 'S BYTE Palayamkottai Flagship'}
+          Dispatching from {currentStore?.name || 'S BYTE Palayamkottai Flagship'}
         </Text>
       </View>
 
@@ -93,10 +104,10 @@ export const CartScreen: React.FC<CartScreenProps> = ({
         {/* Free Delivery Meter */}
         <View style={styles.freeDeliveryCard}>
           <View style={styles.meterRow}>
-            <Text style={styles.meterIcon}>🚚</Text>
+            <Ionicons name="bicycle" size={18} color="#0D2D27" style={{ marginRight: 8 }} />
             <Text style={styles.meterText}>
               {freeDeliveryNeeded === 0
-                ? '🎉 Congratulations! You have unlocked FREE Delivery.'
+                ? 'FREE Delivery Unlocked on this order!'
                 : `Add ₹${freeDeliveryNeeded} more to unlock FREE Delivery.`}
             </Text>
           </View>
@@ -129,15 +140,17 @@ export const CartScreen: React.FC<CartScreenProps> = ({
                   <TouchableOpacity
                     style={styles.qtyBtn}
                     onPress={() => removeFromCart(it.product.id)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.qtyBtnText}>-</Text>
+                    <Ionicons name="remove" size={13} color="#FFFFFF" />
                   </TouchableOpacity>
                   <Text style={styles.qtyVal}>{it.quantity}</Text>
                   <TouchableOpacity
                     style={styles.qtyBtn}
                     onPress={() => addToCart(it.product)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.qtyBtnText}>+</Text>
+                    <Ionicons name="add" size={13} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
 
@@ -150,7 +163,10 @@ export const CartScreen: React.FC<CartScreenProps> = ({
         {/* Delivery Address & Instructions */}
         <View style={styles.deliveryCard}>
           <View style={styles.deliveryHeader}>
-            <Text style={styles.sectionHeading}>Delivery Address</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="location" size={16} color="#123D35" />
+              <Text style={styles.sectionHeading}>Delivery Address</Text>
+            </View>
             <TouchableOpacity onPress={onOpenAddressModal}>
               <Text style={styles.changeLink}>Change</Text>
             </TouchableOpacity>
@@ -164,13 +180,19 @@ export const CartScreen: React.FC<CartScreenProps> = ({
 
         {/* Coupons & Offers */}
         <View style={styles.couponCard}>
-          <Text style={styles.sectionHeading}>Offers & Coupons</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <Ionicons name="pricetag" size={16} color="#123D35" />
+            <Text style={styles.sectionHeading}>Offers & Coupons</Text>
+          </View>
 
           {appliedCouponDetails ? (
             <View style={styles.appliedCouponRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.appliedCode}>🎉 {appliedCouponDetails.code}</Text>
-                <Text style={styles.appliedDesc}>{appliedCouponDetails.discountText}</Text>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Ionicons name="checkmark-circle" size={20} color="#123D35" />
+                <View>
+                  <Text style={styles.appliedCode}>{appliedCouponDetails.code}</Text>
+                  <Text style={styles.appliedDesc}>{appliedCouponDetails.discountText}</Text>
+                </View>
               </View>
               <TouchableOpacity onPress={removeCoupon} style={styles.removeCouponBtn}>
                 <Text style={styles.removeCouponText}>Remove</Text>
@@ -231,7 +253,10 @@ export const CartScreen: React.FC<CartScreenProps> = ({
             onPress={() => setRedeemPoints(!redeemPoints)}
           >
             <View style={{ flex: 1, marginRight: 10 }}>
-              <Text style={styles.loyaltyRedeemTitle}>⭐ Redeem S BYTE Loyalty Points</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="star" size={16} color="#FFB300" />
+                <Text style={styles.loyaltyRedeemTitle}>Redeem S BYTE Loyalty Points</Text>
+              </View>
               <Text style={styles.loyaltyRedeemSub}>
                 {redeemPoints
                   ? `Redeemed 250 points! Saving ₹${pointsDiscount}.`
@@ -239,7 +264,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
               </Text>
             </View>
             <View style={[styles.checkbox, redeemPoints && styles.checkboxActive]}>
-              {redeemPoints && <Text style={{ color: '#123D35', fontWeight: '900', fontSize: 12 }}>✓</Text>}
+              {redeemPoints && <Ionicons name="checkmark" size={13} color="#0D2D27" />}
             </View>
           </TouchableOpacity>
         </View>
@@ -251,7 +276,10 @@ export const CartScreen: React.FC<CartScreenProps> = ({
             onPress={() => setAllowSubstitutions(!allowSubstitutions)}
           >
             <View style={{ flex: 1, marginRight: 10 }}>
-              <Text style={styles.substTitle}>🔄 Smart Item Substitutions</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="sync" size={16} color="#123D35" />
+                <Text style={styles.substTitle}>Smart Item Substitutions</Text>
+              </View>
               <Text style={styles.substSub}>
                 {allowSubstitutions
                   ? 'Consent granted: Store staff will replace any out-of-stock item with an equivalent or premium brand.'
@@ -259,14 +287,17 @@ export const CartScreen: React.FC<CartScreenProps> = ({
               </Text>
             </View>
             <View style={[styles.checkbox, allowSubstitutions && styles.checkboxActive]}>
-              {allowSubstitutions && <Text style={{ color: '#123D35', fontWeight: '900', fontSize: 12 }}>✓</Text>}
+              {allowSubstitutions && <Ionicons name="checkmark" size={13} color="#0D2D27" />}
             </View>
           </TouchableOpacity>
         </View>
 
         {/* Frequently Bought Together Recommendation */}
         <View style={styles.recommendCard}>
-          <Text style={styles.sectionHeading}>🌟 Frequently Bought Together</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <Ionicons name="sparkles" size={16} color="#FF9800" />
+            <Text style={styles.sectionHeading}>Frequently Bought Together</Text>
+          </View>
           <View style={styles.recommendRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.recommendTitle}>Nannari Herbal Sarbath Syrup (750ml)</Text>
@@ -346,7 +377,8 @@ export const CartScreen: React.FC<CartScreenProps> = ({
           onPress={onOpenCheckout}
           activeOpacity={0.85}
         >
-          <Text style={styles.checkoutBtnText}>Proceed to Checkout →</Text>
+          <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
+          <Ionicons name="arrow-forward" size={16} color="#0D2D27" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       </View>
     </View>
@@ -391,6 +423,29 @@ const styles = StyleSheet.create({
     padding: 30,
     alignItems: 'center',
     width: '100%',
+  },
+  cartCountPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.accentLime,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  cartCountText: {
+    color: '#0D2D27',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(200, 241, 105, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyIcon: {
     fontSize: 48,
