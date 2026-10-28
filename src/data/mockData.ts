@@ -1,15 +1,22 @@
 import { ProductCategory, ProductSummary, UnitOfMeasure } from '@sbyte/shared-types';
 
-export const MOBILE_CATEGORIES = [
-  { id: 'ALL', name: 'All Items', icon: '✨' },
-  { id: ProductCategory.GROCERIES_STAPLES, name: 'Groceries & Rice', icon: '🌾' },
-  { id: ProductCategory.FRUITS_VEGETABLES, name: 'Fresh Farm Veg', icon: '🍅' },
-  { id: ProductCategory.SNACKS_MUNCHIES, name: 'Halwa & Snacks', icon: '🍯' },
-  { id: ProductCategory.BEVERAGES, name: 'Tea & Sarbath', icon: '🧃' },
-  { id: ProductCategory.PLASTIC_HOUSEHOLD, name: 'Plastics & Kitchen', icon: '🪣' },
-  { id: ProductCategory.CLEANING_SUPPLIES, name: 'Cleaners & Detergents', icon: '🧼' },
-  { id: ProductCategory.STATIONERY, name: 'Stationery & Books', icon: '📚' },
-  { id: ProductCategory.PERSONAL_CARE, name: 'Personal Care & Soaps', icon: '🌿' },
+export interface MobileCategory {
+  id: string;
+  name: string;
+  icon: string;
+  vectorIcon: 'sparkles' | 'nutrition' | 'basket' | 'fast-food' | 'cafe' | 'cube' | 'water' | 'book' | 'flower';
+}
+
+export const MOBILE_CATEGORIES: MobileCategory[] = [
+  { id: 'ALL', name: 'All Items', icon: '✨', vectorIcon: 'sparkles' },
+  { id: ProductCategory.GROCERIES_STAPLES, name: 'Groceries & Rice', icon: '🌾', vectorIcon: 'nutrition' },
+  { id: ProductCategory.FRUITS_VEGETABLES, name: 'Fresh Farm Veg', icon: '🍅', vectorIcon: 'basket' },
+  { id: ProductCategory.SNACKS_MUNCHIES, name: 'Halwa & Snacks', icon: '🍯', vectorIcon: 'fast-food' },
+  { id: ProductCategory.BEVERAGES, name: 'Tea & Sarbath', icon: '🧃', vectorIcon: 'cafe' },
+  { id: ProductCategory.PLASTIC_HOUSEHOLD, name: 'Plastics & Kitchen', icon: '🪣', vectorIcon: 'cube' },
+  { id: ProductCategory.CLEANING_SUPPLIES, name: 'Cleaners & Detergents', icon: '🧼', vectorIcon: 'water' },
+  { id: ProductCategory.STATIONERY, name: 'Stationery & Books', icon: '📚', vectorIcon: 'book' },
+  { id: ProductCategory.PERSONAL_CARE, name: 'Personal Care & Soaps', icon: '🌿', vectorIcon: 'flower' },
 ];
 
 export const MOBILE_PRODUCTS: ProductSummary[] = [

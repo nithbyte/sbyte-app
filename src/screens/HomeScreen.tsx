@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
-  Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
 import { useLocation } from '../context/LocationContext';
 import { useCart } from '../context/CartContext';
 import { ProductCard } from '../components/ProductCard';
+import { SByteLogo } from '../components/SByteLogo';
 import { ProductSummary, ProductCategory } from '@sbyte/shared-types';
 import { MOBILE_PRODUCTS, MOBILE_CATEGORIES } from '../data/mockData';
 import { api } from '../api/client';
@@ -26,9 +27,8 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenAddressModal,
   onOpenProductDetail,
-  onSelectCategoryTab,
 }) => {
-  const { currentStore, availableStores, selectStore, currentAddress, serviceability } = useLocation();
+  const { currentStore, availableStores, selectStore, currentAddress } = useLocation();
   const { cart, addToCart, removeFromCart } = useCart();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,7 +43,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       subtitle: 'Original wheat milk halwa delivered in 15 mins',
       tag: 'FRESH TODAY',
       code: 'SUPERFAST15',
-      bg: '#123D35',
+      bg: '#0E332C',
       accent: '#C8F169',
     },
     {
@@ -51,15 +51,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       subtitle: 'On orders above ₹499 • Use code SBYTE100',
       tag: 'MEGA DEAL',
       code: 'SBYTE100',
-      bg: '#0D2D27',
+      bg: '#09211C',
       accent: '#FFF9EF',
     },
     {
       title: 'Alangulam Farm Vegetables',
-      subtitle: 'Country tomatoes, greens & daily essentials',
+      subtitle: 'Country tomatoes, greens & daily farm essentials',
       tag: 'LOCAL SOURCED',
       code: 'FRESH10',
-      bg: '#1B5449',
+      bg: '#16433A',
       accent: '#C8F169',
     },
   ];
@@ -115,46 +115,59 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <View style={styles.container}>
       {/* Top Bar Header */}
       <View style={styles.topBar}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            style={styles.locationPill}
-            onPress={onOpenAddressModal}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.locIcon}>📍</Text>
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.locName} numberOfLines={1}>
-                  {currentAddress.locality || 'Palayamkottai'}
-                </Text>
-                <Text style={styles.locDropdown}>▼</Text>
-              </View>
-              <Text style={styles.locSub} numberOfLines={1}>
-                {currentAddress.streetAddress || 'Tap to select delivery location'}
-              </Text>
-            </View>
-          </TouchableOpacity>
+        {/* Brand Row with S BYTE Logo & 15-Min Delivery Badge */}
+        <View style={styles.topBrandRow}>
+          <SByteLogo variant="compact" size={32} light={true} />
 
           <View style={styles.slaBadge}>
-            <Text style={styles.slaNumber}>15</Text>
-            <Text style={styles.slaUnit}>MINS</Text>
+            <Ionicons name="flash" size={14} color="#0D2D27" />
+            <View>
+              <Text style={styles.slaNumber}>15 MINS</Text>
+              <Text style={styles.slaSub}>Express Delivery</Text>
+            </View>
           </View>
         </View>
 
+        {/* Location Selector Bar */}
+        <TouchableOpacity
+          style={styles.locationSelector}
+          onPress={onOpenAddressModal}
+          activeOpacity={0.82}
+        >
+          <View style={styles.locIconWrap}>
+            <Ionicons name="location-sharp" size={16} color={theme.colors.accentLime} />
+          </View>
+          <View style={styles.locTextCol}>
+            <View style={styles.locMainRow}>
+              <Text style={styles.locName} numberOfLines={1}>
+                {currentAddress.locality || 'Palayamkottai'}
+              </Text>
+              <Ionicons name="chevron-down" size={14} color={theme.colors.accentLime} />
+            </View>
+            <Text style={styles.locSub} numberOfLines={1}>
+              {currentAddress.streetAddress || 'Tap to choose delivery location'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons name="search" size={18} color="#123D35" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search groceries, Halwa, rice, snacks..."
-            placeholderTextColor={theme.colors.textMuted}
+            placeholderTextColor="#8C948F"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearch}>
-              <Text style={styles.clearSearchText}>✕</Text>
+          {searchQuery.length > 0 ? (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchAction}>
+              <Ionicons name="close-circle" size={18} color="#8C948F" />
             </TouchableOpacity>
+          ) : (
+            <View style={styles.searchAction}>
+              <Ionicons name="mic-outline" size={18} color="#8C948F" />
+            </View>
           )}
         </View>
       </View>
@@ -166,7 +179,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor={theme.colors.primaryTeal}
+            tintColor={theme.colors.accentLime}
           />
         }
       >
@@ -174,18 +187,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <View style={styles.bannerContainer}>
           <TouchableOpacity
             style={[styles.bannerCard, { backgroundColor: banners[activeBannerIdx].bg }]}
-            activeOpacity={0.9}
+            activeOpacity={0.92}
             onPress={() =>
               setActiveBannerIdx((prev) => (prev + 1) % banners.length)
             }
           >
-            <View style={styles.bannerBadge}>
-              <Text style={styles.bannerBadgeText}>{banners[activeBannerIdx].tag}</Text>
+            <View style={styles.bannerHeaderRow}>
+              <View style={styles.bannerBadge}>
+                <Ionicons name="flame" size={12} color="#0D2D27" />
+                <Text style={styles.bannerBadgeText}>{banners[activeBannerIdx].tag}</Text>
+              </View>
+              <Text style={styles.bannerCounter}>
+                {activeBannerIdx + 1}/{banners.length}
+              </Text>
             </View>
+
             <Text style={styles.bannerTitle}>{banners[activeBannerIdx].title}</Text>
             <Text style={styles.bannerSub}>{banners[activeBannerIdx].subtitle}</Text>
-            <View style={styles.bannerCodePill}>
-              <Text style={styles.bannerCodeText}>CODE: {banners[activeBannerIdx].code}</Text>
+
+            <View style={styles.bannerFooterRow}>
+              <View style={styles.bannerCodePill}>
+                <Text style={styles.bannerCodeText}>CODE: {banners[activeBannerIdx].code}</Text>
+              </View>
+              <Text style={styles.bannerTapHint}>Tap for next offer →</Text>
             </View>
           </TouchableOpacity>
 
@@ -202,12 +226,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Marketplace Shop Discovery Strip */}
         {availableStores && availableStores.length > 0 && (
           <View style={styles.shopsSection}>
-            <View style={styles.shopsHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.shopsEmoji}>🏪</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleWithIcon}>
+                <Ionicons name="storefront" size={18} color="#123D35" />
                 <Text style={styles.shopsTitle}>Local Supermarkets & Shops</Text>
               </View>
-              <Text style={styles.shopsSubBadge}>{availableStores.length} AVAILABLE</Text>
+              <View style={styles.badgePill}>
+                <Text style={styles.badgePillText}>{availableStores.length} ONLINE</Text>
+              </View>
             </View>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.shopsScroll}>
@@ -218,12 +244,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     key={store.id}
                     style={[styles.shopCard, isSelected && styles.activeShopCard]}
                     onPress={() => selectStore(store)}
-                    activeOpacity={0.85}
+                    activeOpacity={0.88}
                   >
                     <View style={styles.shopTopRow}>
-                      <Text style={styles.shopIcon}>🏬</Text>
+                      <View style={[styles.storeIconWrap, isSelected && styles.activeStoreIconWrap]}>
+                        <Ionicons
+                          name="business"
+                          size={16}
+                          color={isSelected ? theme.colors.accentLime : '#123D35'}
+                        />
+                      </View>
                       {isSelected ? (
                         <View style={styles.activePill}>
+                          <Ionicons name="checkmark-circle" size={11} color="#0D2D27" />
                           <Text style={styles.activePillText}>SHOPPING HERE</Text>
                         </View>
                       ) : (
@@ -232,14 +265,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         </View>
                       )}
                     </View>
+
                     <Text style={styles.shopName} numberOfLines={1}>
                       {store.name}
                     </Text>
-                    <Text style={styles.shopLocality} numberOfLines={1}>
-                      📍 {store.locality || store.city}
-                    </Text>
+
+                    <View style={styles.shopLocationRow}>
+                      <Ionicons name="location-outline" size={12} color="#6E7D77" />
+                      <Text style={styles.shopLocality} numberOfLines={1}>
+                        {store.locality || store.city}
+                      </Text>
+                    </View>
+
                     <View style={styles.shopMetaRow}>
-                      <Text style={styles.shopEta}>⚡ {store.deliveryEstimateMin || 15} mins</Text>
+                      <View style={styles.shopMetaBadge}>
+                        <Ionicons name="flash" size={11} color="#123D35" />
+                        <Text style={styles.shopEta}>{store.deliveryEstimateMin || 15} mins</Text>
+                      </View>
                       <Text style={styles.shopMinOrder}>Min ₹{store.minOrderAmount || 99}</Text>
                     </View>
                   </TouchableOpacity>
@@ -259,8 +301,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   key={cat.id}
                   style={[styles.categoryPill, isSelected && styles.activeCategoryPill]}
                   onPress={() => setSelectedCategory(cat.id)}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                  <Ionicons
+                    name={cat.vectorIcon}
+                    size={16}
+                    color={isSelected ? theme.colors.accentLime : '#4A5B54'}
+                    style={{ marginRight: 6 }}
+                  />
                   <Text
                     style={[styles.categoryName, isSelected && styles.activeCategoryName]}
                   >
@@ -275,21 +323,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Section 1: Flash Deals */}
         {selectedCategory === 'ALL' && !searchQuery && flashDeals.length > 0 && (
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.sectionEmoji}>⚡</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleWithIcon}>
+                <Ionicons name="flash" size={18} color="#FF9800" />
                 <Text style={styles.sectionTitle}>Flash Deals & Offers</Text>
               </View>
-              <Text style={styles.sectionBadge}>UP TO 20% OFF</Text>
+              <View style={styles.offerBadge}>
+                <Text style={styles.offerBadgeText}>UP TO 20% OFF</Text>
+              </View>
             </View>
 
             <View style={styles.grid}>
               {flashDeals.map((prod) => (
                 <TouchableOpacity
                   key={prod.id}
-                  style={{ width: '48%', marginBottom: 12 }}
+                  style={styles.gridItem}
                   onPress={() => onOpenProductDetail(prod)}
-                  activeOpacity={0.9}
+                  activeOpacity={0.92}
                 >
                   <ProductCard
                     product={prod}
@@ -306,21 +356,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Section 2: Regional Specials */}
         {selectedCategory === 'ALL' && !searchQuery && regionalSpecials.length > 0 && (
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.sectionEmoji}>🌴</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleWithIcon}>
+                <Ionicons name="sparkles" size={18} color="#123D35" />
                 <Text style={styles.sectionTitle}>Tirunelveli Specials</Text>
               </View>
-              <Text style={styles.sectionLink}>Farm to Table</Text>
+              <Text style={styles.sectionSubtext}>Farm to Table</Text>
             </View>
 
             <View style={styles.grid}>
               {regionalSpecials.map((prod) => (
                 <TouchableOpacity
                   key={prod.id}
-                  style={{ width: '48%', marginBottom: 12 }}
+                  style={styles.gridItem}
                   onPress={() => onOpenProductDetail(prod)}
-                  activeOpacity={0.9}
+                  activeOpacity={0.92}
                 >
                   <ProductCard
                     product={prod}
@@ -336,23 +386,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Section 3: All Products / Filtered Results */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {selectedCategory === 'ALL'
-                ? searchQuery
-                  ? `Search results for "${searchQuery}"`
-                  : 'Popular Daily Essentials'
-                : 'Category Products'}
-            </Text>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionTitleWithIcon}>
+              <Ionicons name="grid" size={17} color="#123D35" />
+              <Text style={styles.sectionTitle}>
+                {selectedCategory === 'ALL'
+                  ? searchQuery
+                    ? `Results for "${searchQuery}"`
+                    : 'Popular Daily Essentials'
+                  : 'Department Products'}
+              </Text>
+            </View>
             <Text style={styles.itemCount}>{filtered.length} items</Text>
           </View>
 
           {filtered.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>📦</Text>
-              <Text style={styles.emptyTitle}>No products found</Text>
+              <Ionicons name="search-outline" size={44} color="#8C948F" />
+              <Text style={styles.emptyTitle}>No matching products</Text>
               <Text style={styles.emptySub}>
-                Try adjusting your search query or choosing another category.
+                Try adjusting your search query or picking another supermarket department.
               </Text>
             </View>
           ) : (
@@ -360,9 +413,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               {filtered.map((prod) => (
                 <TouchableOpacity
                   key={prod.id}
-                  style={{ width: '48%', marginBottom: 12 }}
+                  style={styles.gridItem}
                   onPress={() => onOpenProductDetail(prod)}
-                  activeOpacity={0.9}
+                  activeOpacity={0.92}
                 >
                   <ProductCard
                     product={prod}
@@ -383,139 +436,195 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bgCream,
+    backgroundColor: '#F8F9F7',
   },
   topBar: {
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0E332C',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 14,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
+    paddingTop: 10,
+    paddingBottom: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  headerRow: {
+  topBrandRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  locationPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
-  },
-  locIcon: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  locName: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#FFF',
-    marginRight: 4,
-  },
-  locDropdown: {
-    fontSize: 10,
-    color: theme.colors.accentLime,
-  },
-  locSub: {
-    fontSize: 11,
-    color: '#B2C4BD',
-    marginTop: 1,
+    marginBottom: 10,
   },
   slaBadge: {
     backgroundColor: theme.colors.accentLime,
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   slaNumber: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '900',
-    color: theme.colors.primaryTealDark,
-    lineHeight: 15,
+    color: '#0D2D27',
+    letterSpacing: 0.5,
   },
-  slaUnit: {
+  slaSub: {
     fontSize: 8,
     fontWeight: '800',
-    color: theme.colors.primaryTealDark,
+    color: '#16433A',
+    textTransform: 'uppercase',
+  },
+  locationSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 241, 105, 0.2)',
+  },
+  locIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(200, 241, 105, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  locTextCol: {
+    flex: 1,
+  },
+  locMainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  locName: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+  locSub: {
+    fontSize: 11,
+    color: '#A9BDB5',
+    marginTop: 1,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 44,
+    height: 46,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    color: theme.colors.textInk,
+    color: '#16231F',
+    fontWeight: '500',
   },
-  clearSearch: {
+  searchAction: {
     padding: 4,
   },
-  clearSearchText: {
-    fontSize: 13,
-    color: theme.colors.textMuted,
-    fontWeight: '700',
-  },
   scrollContent: {
-    paddingBottom: 100, // accommodate bottom tab
+    paddingBottom: 90,
   },
   bannerContainer: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 14,
     paddingBottom: 4,
   },
   bannerCard: {
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
-    minHeight: 120,
-    justifyContent: 'center',
+    minHeight: 128,
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(200, 241, 105, 0.25)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  bannerHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   bannerBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(200, 241, 105, 0.25)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 6,
-  },
-  bannerBadgeText: {
-    color: theme.colors.accentLime,
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  bannerTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#FFF',
-  },
-  bannerSub: {
-    fontSize: 12,
-    color: '#E0E8E4',
-    marginTop: 3,
-  },
-  bannerCodePill: {
-    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: theme.colors.accentLime,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 8,
+  },
+  bannerBadgeText: {
+    color: '#0D2D27',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  bannerCounter: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginTop: 8,
   },
+  bannerSub: {
+    fontSize: 12,
+    color: '#D2DFD9',
+    marginTop: 3,
+  },
+  bannerFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  bannerCodePill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
   bannerCodeText: {
-    color: theme.colors.primaryTealDark,
+    color: theme.colors.accentLime,
     fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  bannerTapHint: {
+    color: 'rgba(200, 241, 105, 0.85)',
+    fontSize: 11,
+    fontWeight: '700',
   },
   dotsRow: {
     flexDirection: 'row',
@@ -527,14 +636,153 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: '#D4DDD8',
   },
   activeDot: {
-    backgroundColor: theme.colors.primaryTeal,
-    width: 16,
+    backgroundColor: '#0E332C',
+    width: 18,
+  },
+  shopsSection: {
+    paddingHorizontal: 16,
+    marginTop: 14,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sectionTitleWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  shopsTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#16231F',
+  },
+  badgePill: {
+    backgroundColor: 'rgba(18, 61, 53, 0.08)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  badgePillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#123D35',
+    letterSpacing: 0.4,
+  },
+  shopsScroll: {
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
+  shopCard: {
+    width: 210,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: '#E6EBE8',
+    shadowColor: '#123D35',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  activeShopCard: {
+    borderColor: '#123D35',
+    backgroundColor: '#F5FAF7',
+  },
+  shopTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  storeIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#EBF2EE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeStoreIconWrap: {
+    backgroundColor: '#0E332C',
+  },
+  activePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.colors.accentLime,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  activePillText: {
+    color: '#0D2D27',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  switchPill: {
+    backgroundColor: '#F0F3F1',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  switchPillText: {
+    color: '#55665F',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  shopName: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#16231F',
+  },
+  shopLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  shopLocality: {
+    fontSize: 11,
+    color: '#6E7D77',
+  },
+  shopMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#EFF3F0',
+  },
+  shopMetaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(200, 241, 105, 0.25)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  shopEta: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#0E332C',
+  },
+  shopMinOrder: {
+    fontSize: 11,
+    color: '#8A9993',
+    fontWeight: '600',
   },
   categorySection: {
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   categoryScroll: {
     paddingHorizontal: 16,
@@ -542,66 +790,63 @@ const styles = StyleSheet.create({
   categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.bgCard,
-    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 24,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
+    borderColor: '#E2E7E4',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   activeCategoryPill: {
-    backgroundColor: theme.colors.primaryTeal,
-    borderColor: theme.colors.primaryTeal,
-  },
-  categoryIcon: {
-    fontSize: 14,
-    marginRight: 6,
+    backgroundColor: '#0E332C',
+    borderColor: '#0E332C',
   },
   categoryName: {
     fontSize: 12,
     fontWeight: '700',
-    color: theme.colors.textCharcoal,
+    color: '#2C3A35',
   },
   activeCategoryName: {
     color: theme.colors.accentLime,
+    fontWeight: '800',
   },
   section: {
     paddingHorizontal: 16,
-    marginTop: 14,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  sectionEmoji: {
-    fontSize: 16,
-    marginRight: 6,
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
   },
-  sectionBadge: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: theme.colors.primaryTeal,
-    backgroundColor: theme.colors.accentLimeSubtle,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+  offerBadge: {
+    backgroundColor: '#FFF4E5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFE0B2',
   },
-  sectionLink: {
+  offerBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#E65100',
+    letterSpacing: 0.4,
+  },
+  sectionSubtext: {
     fontSize: 11,
-    color: theme.colors.textSlate,
+    color: '#6E7D77',
     fontWeight: '600',
   },
   itemCount: {
     fontSize: 11,
-    color: theme.colors.textMuted,
+    color: '#8A9993',
     fontWeight: '600',
   },
   grid: {
@@ -609,127 +854,25 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
+  gridItem: {
+    width: '48%',
+    marginBottom: 14,
+  },
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyIcon: {
-    fontSize: 40,
-    marginBottom: 8,
+    paddingVertical: 48,
   },
   emptyTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: theme.colors.textInk,
+    color: '#16231F',
+    marginTop: 8,
   },
   emptySub: {
     fontSize: 12,
-    color: theme.colors.textSlate,
+    color: '#6E7D77',
     textAlign: 'center',
     marginTop: 4,
-    maxWidth: 240,
-  },
-  shopsSection: {
-    paddingHorizontal: 16,
-    marginTop: 12,
-  },
-  shopsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  shopsEmoji: {
-    fontSize: 16,
-    marginRight: 6,
-  },
-  shopsTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: theme.colors.textInk,
-  },
-  shopsSubBadge: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: theme.colors.primaryTeal,
-    backgroundColor: theme.colors.accentLimeSubtle,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  shopsScroll: {
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
-  },
-  shopCard: {
-    width: 200,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    marginRight: 10,
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-  },
-  activeShopCard: {
-    borderColor: theme.colors.primaryTeal,
-    backgroundColor: '#F0FDF4',
-  },
-  shopTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  shopIcon: {
-    fontSize: 18,
-  },
-  activePill: {
-    backgroundColor: theme.colors.primaryTeal,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  activePillText: {
-    color: '#FFF9EF',
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  switchPill: {
-    backgroundColor: '#E5E7EB',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  switchPillText: {
-    color: '#4B5563',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  shopName: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: theme.colors.textInk,
-  },
-  shopLocality: {
-    fontSize: 11,
-    color: theme.colors.textMuted,
-    marginTop: 2,
-  },
-  shopMetaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  shopEta: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: theme.colors.primaryTeal,
-  },
-  shopMinOrder: {
-    fontSize: 11,
-    color: theme.colors.textMuted,
+    maxWidth: 250,
   },
 });

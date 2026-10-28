@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme/tokens';
+import { SByteLogo } from './SByteLogo';
 
 interface HeaderProps {
   currentLocality: string;
@@ -19,26 +21,11 @@ export const Header: React.FC<HeaderProps> = ({
     <View style={styles.container}>
       {/* Top row: Brand & SLA Delivery Badge */}
       <View style={styles.topRow}>
-        <View>
-          <View style={styles.brandRow}>
-            <View style={styles.logoBadge}>
-              <Text style={styles.logoText}>S</Text>
-            </View>
-            <Text style={styles.brandName}>S BYTE</Text>
-            <View style={styles.brandDot} />
-          </View>
-          <TouchableOpacity onPress={onSelectLocality} style={styles.locationSelector}>
-            <Text style={styles.locationPin}>📍</Text>
-            <Text style={styles.locationText} numberOfLines={1}>
-              {currentLocality}, Tirunelveli
-            </Text>
-            <Text style={styles.downArrow}>▾</Text>
-          </TouchableOpacity>
-        </View>
+        <SByteLogo variant="compact" size={32} light={true} />
 
         {/* 15-Min Delivery Badge */}
         <View style={styles.slaBadge}>
-          <Text style={styles.slaZap}>⚡</Text>
+          <Ionicons name="flash" size={13} color="#0D2D27" />
           <View>
             <Text style={styles.slaTitle}>15 MINS</Text>
             <Text style={styles.slaSubtitle}>Superfast</Text>
@@ -46,9 +33,18 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
       </View>
 
+      {/* Location Selector Pill */}
+      <TouchableOpacity onPress={onSelectLocality} style={styles.locationSelector} activeOpacity={0.85}>
+        <Ionicons name="location-sharp" size={15} color={theme.colors.accentLime} style={{ marginRight: 6 }} />
+        <Text style={styles.locationText} numberOfLines={1}>
+          {currentLocality}, Tirunelveli
+        </Text>
+        <Ionicons name="chevron-down" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
+      </TouchableOpacity>
+
       {/* Search Bar */}
       <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Ionicons name="search" size={18} color="#123D35" style={styles.searchIcon} />
         <TextInput
           placeholder="Search rice, halwa, veggies, plastics..."
           placeholderTextColor="#8C948F"
@@ -57,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
           style={styles.searchInput}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')}>
-            <Text style={styles.clearSearch}>✕</Text>
+          <TouchableOpacity onPress={() => onSearchChange('')} style={styles.clearSearch}>
+            <Ionicons name="close-circle" size={18} color="#8C948F" />
           </TouchableOpacity>
         )}
       </View>
@@ -68,115 +64,87 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.primaryTeal,
+    backgroundColor: '#0E332C',
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 16,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  logoBadge: {
-    width: 24,
-    height: 24,
-    backgroundColor: theme.colors.accentLime,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoText: {
-    fontWeight: '900',
-    fontSize: 14,
-    color: theme.colors.primaryTeal,
-  },
-  brandName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  brandDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.colors.accentLime,
+    marginBottom: 10,
   },
   locationSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 3,
-  },
-  locationPin: {
-    fontSize: 12,
-    marginRight: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(200, 241, 105, 0.2)',
   },
   locationText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: theme.colors.accentLime,
-    maxWidth: 190,
-  },
-  downArrow: {
+    fontWeight: '700',
     color: '#FFFFFF',
-    marginLeft: 4,
-    fontSize: 10,
+    flex: 1,
   },
   slaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(200, 241, 105, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(200, 241, 105, 0.3)',
+    backgroundColor: theme.colors.accentLime,
     borderRadius: 12,
     paddingVertical: 5,
     paddingHorizontal: 10,
     gap: 6,
-  },
-  slaZap: {
-    fontSize: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   slaTitle: {
-    color: theme.colors.accentLime,
+    color: '#0D2D27',
     fontWeight: '900',
     fontSize: 12,
+    letterSpacing: 0.5,
   },
   slaSubtitle: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '500',
+    color: '#16433A',
+    fontSize: 8,
+    fontWeight: '800',
+    textTransform: 'uppercase',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    height: 46,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
   searchIcon: {
     marginRight: 8,
-    fontSize: 14,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    color: theme.colors.textInk,
-    padding: 0,
+    fontSize: 13,
+    color: '#16231F',
+    fontWeight: '500',
   },
   clearSearch: {
-    color: '#8C948F',
-    paddingHorizontal: 6,
-    fontSize: 14,
-    fontWeight: '700',
+    padding: 4,
   },
 });
